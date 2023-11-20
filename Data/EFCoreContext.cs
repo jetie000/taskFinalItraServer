@@ -17,7 +17,7 @@ namespace finalTaskItra.Data
         public DbSet<Collection> collections { get; set; } = null!;
         public DbSet<Item> items { get; set; } = null!;
         public DbSet<Comment> comments { get; set; } = null!;
-        public DbSet<Like> likes { get; set; } = null!;
+        public DbSet<Reaction> likes { get; set; } = null!;
         public DbSet<ItemFields> itemFields { get; set; } = null!;
         public DbSet<Tag> tags { get; set; } = null!;
 
