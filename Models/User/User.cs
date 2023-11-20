@@ -12,6 +12,6 @@
         public DateTime joinDate { get; set; }
         public DateTime loginDate { get; set; }
         public bool isOnline { get; set; }
-        public ICollection<Collection>? collections { get; set; }
+        public ICollection<MyCollection> collections { get; set; } = new List<MyCollection>();
     }
 }

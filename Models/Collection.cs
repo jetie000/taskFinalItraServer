@@ -1,6 +1,6 @@
 ﻿namespace finalTaskItra.Models
 {
-    public class Collection
+    public class MyCollection
     {
         public int id { get; set; }
         public string title { get; set; } = null!;
@@ -9,5 +9,6 @@
         public string? photoPath { get; set; }
         public DateTime creationDate { get; set; }
         public ICollection<Item>? items { get; set; }
+        public ICollection<CollectionFields>? fields { get; set; }
     }
 }

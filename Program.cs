@@ -3,6 +3,7 @@ using finalTaskItra.Controllers;
 using finalTaskItra.Data;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.FileProviders;
 using Microsoft.IdentityModel.Tokens;
 
 
@@ -48,8 +49,11 @@ app.UseCors("AllowOrigin");
 app.UseSwagger();
 app.UseSwaggerUI();
 
-app.UseDefaultFiles();
-app.UseStaticFiles();
+app.UseStaticFiles(new StaticFileOptions
+{
+    FileProvider = new PhysicalFileProvider(Path.Combine(Directory.GetCurrentDirectory(), "photos")),
+    RequestPath = "/photos"
+});
 
 app.UseHttpsRedirection();
 
