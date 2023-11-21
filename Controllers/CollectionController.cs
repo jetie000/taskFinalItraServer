@@ -2,8 +2,7 @@
 using finalTaskItra.Models;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using System.Collections;
-using System.IO;
+using Microsoft.EntityFrameworkCore;
 
 namespace finalTaskItra.Controllers
 {
@@ -29,7 +28,36 @@ namespace finalTaskItra.Controllers
             User? user = _context.users.FirstOrDefault(user => user.accessToken == accessToken);
             if (user is null)
                 return new JsonResult("No user found.");
-            return new JsonResult(user.collections);
+            var collections = _context.users
+                .Include(user => user.collections)
+                    .ThenInclude(c => c.items)
+                .Include(user => user.collections)
+                    .ThenInclude(c => c.collectionFields)
+                .FirstOrDefault(user => user.accessToken == accessToken)
+                .collections
+                .ToList();
+            return new JsonResult(collections);
+        }
+
+        [HttpGet("getOneMy/")]
+        [Authorize(Roles = "0")]
+        public JsonResult GetOneMyCollection(string accessToken, int collectionId)
+        {
+            User? user = _context.users.Include(user => user.collections).FirstOrDefault(user => user.accessToken == accessToken);
+            if (user is null)
+                return new JsonResult("No user found.");
+            var collection = _context.collections
+                .Include(collection => collection.collectionFields)
+                .Include(collection => collection.items)
+                    .ThenInclude(item => item.tags)
+                .Include(collection => collection.items)
+                    .ThenInclude(item => item.likes)
+                .FirstOrDefault(collection => collection.id == collectionId);
+            if (collection is null)
+                return new JsonResult("No collection found.");
+            if (!user.collections.Any(collectionToCheck => collectionToCheck.id == collection.id))
+                return new JsonResult("This collection is not yours.");
+            return new JsonResult(collection);
         }
 
         [HttpPost("add/")]
@@ -39,12 +67,11 @@ namespace finalTaskItra.Controllers
             User? user = _context.users.FirstOrDefault(user => user.accessToken == accessToken);
             if (user is null)
                 return new JsonResult("No user found.");
-            Console.WriteLine(collection.photoPath);
             user.collections.Add(collection);
             _context.SaveChanges();
             return new JsonResult("Collection added.");
         }
-
+        
         [HttpPut("changeInfoMy/")]
         [Authorize(Roles = "0")]
         public JsonResult changeMyCollection(MyCollection collection, string accessToken)
@@ -67,10 +94,13 @@ namespace finalTaskItra.Controllers
         [Authorize(Roles = "0")]
         public JsonResult deleteMyCollection(int id, string accessToken)
         {
-            User? user = _context.users.FirstOrDefault(user => user.accessToken == accessToken);
+            User? user = _context.users
+                .Include(user => user.collections)
+                .FirstOrDefault(user => user.accessToken == accessToken);
             if (user is null)
                 return new JsonResult("No user found.");
-            MyCollection? myCollection = user.collections?.FirstOrDefault(collectionToFind => collectionToFind.id == id);
+            MyCollection? myCollection = user.collections?
+                .FirstOrDefault(collectionToFind => collectionToFind.id == id);
             if (myCollection is null)
                 return new JsonResult("No collection found.");
             _context.collections.Remove(myCollection);

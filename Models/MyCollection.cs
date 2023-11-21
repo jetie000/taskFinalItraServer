@@ -8,7 +8,7 @@
         public string theme { get; set; } = null!;
         public string? photoPath { get; set; }
         public DateTime creationDate { get; set; }
-        public ICollection<Item>? items { get; set; }
-        public ICollection<CollectionFields>? fields { get; set; }
+        public ICollection<Item> items { get; set; } = new List<Item>();
+        public ICollection<CollectionFields> collectionFields { get; set; } = new List<CollectionFields>();
     }
 }

@@ -3,7 +3,7 @@
     public class CollectionFields
     {
         public int id { get; set; }
-        public string? fieldName { get; set; }
-        public string? fieldType { get; set; }
+        public string fieldName { get; set; } = null!;
+        public string fieldType { get; set; } = null!;
     }
 }
