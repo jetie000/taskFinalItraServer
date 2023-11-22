@@ -5,5 +5,6 @@
         public int id { get; set; }
         public string fieldName { get; set; } = null!;
         public string fieldType { get; set; } = null!;
+        public virtual MyCollection? myCollection { get; set; }
     }
 }

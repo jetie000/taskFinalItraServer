@@ -10,5 +10,6 @@
         public DateTime creationDate { get; set; }
         public ICollection<Item> items { get; set; } = new List<Item>();
         public ICollection<CollectionFields> collectionFields { get; set; } = new List<CollectionFields>();
+        public virtual User? user { get; set; }
     }
 }

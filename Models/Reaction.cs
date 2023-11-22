@@ -6,5 +6,6 @@
         public int userId { get; set; }
         public bool isLike { get; set; }
         public DateTime creationDate { get; set; }
+        public virtual Item? item { get; set; }
     }
 }

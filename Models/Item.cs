@@ -9,5 +9,6 @@
         public ICollection<ItemFields> fields { get; set; } = new List<ItemFields>();
         public ICollection<Comment> comments { get; set; } = new List<Comment>();
         public ICollection<Reaction> likes { get; set; } = new List<Reaction>();
+        public virtual MyCollection? myCollection { get; set; }
     }
 }

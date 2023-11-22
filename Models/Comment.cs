@@ -6,5 +6,6 @@
         public string comment { get; set; } = null!;
         public int userId { get; set; }
         public DateTime creationDate { get; set; }
+        public virtual Item? item { get; set; }
     }
 }

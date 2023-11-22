@@ -32,22 +32,20 @@ namespace finalTaskItra.Controllers
                 .Include(user => user.collections)
                     .ThenInclude(c => c.items)
                 .Include(user => user.collections)
-                    .ThenInclude(c => c.collectionFields)
-                .FirstOrDefault(user => user.accessToken == accessToken)
+                    .ThenInclude(c => c.collectionFields)?
+                .FirstOrDefault(user => user.accessToken == accessToken)?
                 .collections
                 .ToList();
             return new JsonResult(collections);
         }
 
-        [HttpGet("getOneMy/")]
+        [HttpGet("getOne/")]
         [Authorize(Roles = "0")]
-        public JsonResult GetOneMyCollection(string accessToken, int collectionId)
+        public JsonResult GetOneCollection(int collectionId)
         {
-            User? user = _context.users.Include(user => user.collections).FirstOrDefault(user => user.accessToken == accessToken);
-            if (user is null)
-                return new JsonResult("No user found.");
             var collection = _context.collections
                 .Include(collection => collection.collectionFields)
+                .Include(collection => collection.user)
                 .Include(collection => collection.items)
                     .ThenInclude(item => item.tags)
                 .Include(collection => collection.items)
@@ -55,9 +53,11 @@ namespace finalTaskItra.Controllers
                 .FirstOrDefault(collection => collection.id == collectionId);
             if (collection is null)
                 return new JsonResult("No collection found.");
-            if (!user.collections.Any(collectionToCheck => collectionToCheck.id == collection.id))
-                return new JsonResult("This collection is not yours.");
-            return new JsonResult(collection);
+            CollectionInfo collectionInfo = new CollectionInfo();
+            collectionInfo.collection = collection;
+            collectionInfo.userName = collection.user.fullName;
+            collectionInfo.userId = collection.user.id;
+            return new JsonResult(collectionInfo);
         }
 
         [HttpPost("add/")]

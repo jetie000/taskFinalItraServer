@@ -11,5 +11,6 @@
         public DateTime? dateFieldValue { get; set; }
         public string? boolFieldName { get; set; }
         public bool? boolFieldValue { get; set; }
+        public virtual Item? item { get; set; }
     }
 }
