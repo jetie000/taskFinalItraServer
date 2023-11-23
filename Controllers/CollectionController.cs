@@ -31,7 +31,7 @@ namespace finalTaskItra.Controllers
             var collections = _context.collections
                 .Include(c => c.items)
                 .Include(user => user.collectionFields)
-                .Where(collection => collection.user.accessToken == accessToken);
+                .Where(collection => collection.user!.accessToken == accessToken);
             return new JsonResult(collections);
         }
 
@@ -49,9 +49,10 @@ namespace finalTaskItra.Controllers
             if (collection is null)
                 return new JsonResult("No collection found.");
             CollectionInfo collectionInfo = new CollectionInfo();
-            collectionInfo.collection = collection;
-            collectionInfo.userName = collection.user.fullName;
+            collectionInfo.userName = collection.user!.fullName;
             collectionInfo.userId = collection.user.id;
+            collection.user = null;
+            collectionInfo.collection = collection;
             return new JsonResult(collectionInfo);
         }
 
@@ -67,7 +68,7 @@ namespace finalTaskItra.Controllers
             return new JsonResult("Collection added.");
         }
         
-        [HttpPut("changeInfoMy/")]
+        [HttpPut("change/")]
         [Authorize(Roles = "0")]
         public JsonResult changeMyCollection(MyCollection collection, string accessToken)
         {
@@ -81,7 +82,6 @@ namespace finalTaskItra.Controllers
             myCollection.description = collection.description;
             myCollection.theme = collection.theme;
             myCollection.photoPath = collection.photoPath;
-            Console.WriteLine("photoPath" + collection.photoPath);
             _context.SaveChanges();
             return new JsonResult("Collection changed.");
         }
