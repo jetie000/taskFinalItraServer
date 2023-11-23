@@ -28,19 +28,14 @@ namespace finalTaskItra.Controllers
             User? user = _context.users.FirstOrDefault(user => user.accessToken == accessToken);
             if (user is null)
                 return new JsonResult("No user found.");
-            var collections = _context.users
-                .Include(user => user.collections)
-                    .ThenInclude(c => c.items)
-                .Include(user => user.collections)
-                    .ThenInclude(c => c.collectionFields)?
-                .FirstOrDefault(user => user.accessToken == accessToken)?
-                .collections
-                .ToList();
+            var collections = _context.collections
+                .Include(c => c.items)
+                .Include(user => user.collectionFields)
+                .Where(collection => collection.user.accessToken == accessToken);
             return new JsonResult(collections);
         }
 
         [HttpGet("getOne/")]
-        [Authorize(Roles = "0")]
         public JsonResult GetOneCollection(int collectionId)
         {
             var collection = _context.collections
@@ -76,7 +71,7 @@ namespace finalTaskItra.Controllers
         [Authorize(Roles = "0")]
         public JsonResult changeMyCollection(MyCollection collection, string accessToken)
         {
-            User? user = _context.users.FirstOrDefault(user => user.accessToken == accessToken);
+            User? user = _context.users.Include(user => user.collections).FirstOrDefault(user => user.accessToken == accessToken);
             if (user is null)
                 return new JsonResult("No user found.");
             MyCollection? myCollection = user.collections?.FirstOrDefault(collectionToFind => collectionToFind.id == collection.id);
@@ -86,6 +81,7 @@ namespace finalTaskItra.Controllers
             myCollection.description = collection.description;
             myCollection.theme = collection.theme;
             myCollection.photoPath = collection.photoPath;
+            Console.WriteLine("photoPath" + collection.photoPath);
             _context.SaveChanges();
             return new JsonResult("Collection changed.");
         }

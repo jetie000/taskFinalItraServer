@@ -3,6 +3,7 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using finalTaskItra.Data;
 
@@ -11,9 +12,11 @@ using finalTaskItra.Data;
 namespace finalTaskItra.Migrations
 {
     [DbContext(typeof(EFCoreContext))]
-    partial class EFCoreContextModelSnapshot : ModelSnapshot
+    [Migration("20231122190615_FixItemFields")]
+    partial class FixItemFields
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -109,24 +112,16 @@ namespace finalTaskItra.Migrations
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("id"));
 
-                    b.Property<bool?>("boolFieldValue")
-                        .HasColumnType("bit");
-
-                    b.Property<DateTime?>("dateFieldValue")
-                        .HasColumnType("datetime2");
-
-                    b.Property<double?>("doubleFieldValue")
-                        .HasColumnType("float");
-
                     b.Property<string>("fieldName")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("fieldType")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<int?>("itemid")
                         .HasColumnType("int");
-
-                    b.Property<string>("stringFieldValue")
-                        .HasColumnType("nvarchar(max)");
 
                     b.HasKey("id");
 

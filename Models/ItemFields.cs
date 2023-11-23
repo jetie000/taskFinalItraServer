@@ -3,13 +3,10 @@
     public class ItemFields
     {
         public int id { get; set; }
-        public string? stringFieldName { get; set; }
-        public string? stringFieldValue { get; set; }
-        public string? doubleFieldName { get; set; }
+        public string fieldName { get; set; } = null!;
+        public string? stringFieldValue { get; set; } = null!;
         public double? doubleFieldValue { get; set; }
-        public string? dateFieldName { get; set; }
         public DateTime? dateFieldValue { get; set; }
-        public string? boolFieldName { get; set; }
         public bool? boolFieldValue { get; set; }
         public virtual Item? item { get; set; }
     }
