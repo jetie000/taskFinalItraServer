@@ -7,5 +7,7 @@
         public string saltedNewPassword { get; set; } = null!;
         public string fullName { get; set; } = null!;
         public string accessToken { get; set; } = null!;
+        public bool access {  get; set; }
+        public int role { get; set; }
     }
 }

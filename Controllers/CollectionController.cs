@@ -22,7 +22,7 @@ namespace finalTaskItra.Controllers
         }
 
         [HttpGet("getMy/")]
-        [Authorize(Roles = "0")]
+        [Authorize(Roles = "0, 1")]
         public JsonResult GetMyCollections(string accessToken)
         {
             User? user = _context.users.FirstOrDefault(user => user.accessToken == accessToken);
@@ -45,6 +45,8 @@ namespace finalTaskItra.Controllers
                     .ThenInclude(item => item.tags)
                 .Include(collection => collection.items)
                     .ThenInclude(item => item.likes)
+                .Include(collection => collection.items)
+                    .ThenInclude(item => item.comments)
                 .FirstOrDefault(collection => collection.id == collectionId);
             if (collection is null)
                 return new JsonResult("No collection found.");
@@ -57,25 +59,33 @@ namespace finalTaskItra.Controllers
         }
 
         [HttpPost("add/")]
-        [Authorize(Roles = "0")]
+        [Authorize(Roles = "0, 1")]
         public JsonResult PostMyCollection(MyCollection collection, string accessToken)
         {
-            User? user = _context.users.FirstOrDefault(user => user.accessToken == accessToken);
+            User? user = _context.users
+                .Include(user => user.collections)
+                .FirstOrDefault(user => user.accessToken == accessToken);
             if (user is null)
                 return new JsonResult("No user found.");
             user.collections.Add(collection);
             _context.SaveChanges();
             return new JsonResult("Collection added.");
         }
-        
+
         [HttpPut("change/")]
-        [Authorize(Roles = "0")]
+        [Authorize(Roles = "0, 1")]
         public JsonResult changeMyCollection(MyCollection collection, string accessToken)
         {
             User? user = _context.users.Include(user => user.collections).FirstOrDefault(user => user.accessToken == accessToken);
             if (user is null)
                 return new JsonResult("No user found.");
-            MyCollection? myCollection = user.collections?.FirstOrDefault(collectionToFind => collectionToFind.id == collection.id);
+            MyCollection? myCollection;
+            if (user.role == 1)
+            {
+                myCollection = _context.collections.FirstOrDefault(collectionToFind => collectionToFind.id == collection.id);
+            }
+            else
+                myCollection = user.collections?.FirstOrDefault(collectionToFind => collectionToFind.id == collection.id);
             if (myCollection is null)
                 return new JsonResult("No collection found.");
             myCollection.title = collection.title;
@@ -87,7 +97,7 @@ namespace finalTaskItra.Controllers
         }
 
         [HttpDelete("delete/")]
-        [Authorize(Roles = "0")]
+        [Authorize(Roles = "0, 1")]
         public JsonResult deleteMyCollection(int id, string accessToken)
         {
             User? user = _context.users
@@ -95,7 +105,13 @@ namespace finalTaskItra.Controllers
                 .FirstOrDefault(user => user.accessToken == accessToken);
             if (user is null)
                 return new JsonResult("No user found.");
-            MyCollection? myCollection = user.collections?
+            MyCollection? myCollection;
+            if (user.role == 1)
+            {
+                myCollection = _context.collections.FirstOrDefault(collectionToFind => collectionToFind.id == id);
+            }
+            else
+                myCollection = user.collections?
                 .FirstOrDefault(collectionToFind => collectionToFind.id == id);
             if (myCollection is null)
                 return new JsonResult("No collection found.");
@@ -105,7 +121,7 @@ namespace finalTaskItra.Controllers
         }
 
         [HttpPost("saveCollectionPhoto/")]
-        [Authorize(Roles = "0")]
+        [Authorize(Roles = "0, 1")]
         public JsonResult SaveCollectionPhoto(string accessToken)
         {
             var userId = _context.users.FirstOrDefault(user => user.accessToken == accessToken)?.id;

@@ -47,7 +47,7 @@ namespace finalTaskItra.Controllers
 
 
         [HttpPost("add/")]
-        [Authorize(Roles = "0")]
+        [Authorize(Roles = "0, 1")]
         public JsonResult PostMyItem(Item item, int collectionId, string accessToken)
         {
             User? user = _context.users
@@ -72,7 +72,7 @@ namespace finalTaskItra.Controllers
         }
 
         [HttpPut("change/")]
-        [Authorize(Roles = "0")]
+        [Authorize(Roles = "0, 1")]
         public JsonResult ChangeMyItem(Item item, string accessToken)
         {
             User? user = _context.users
@@ -87,7 +87,7 @@ namespace finalTaskItra.Controllers
                 .FirstOrDefault(itemFind => itemFind.id == item.id);
             if (itemFind is null)
                 return new JsonResult("No item found.");
-            if (itemFind!.myCollection!.user!.accessToken != accessToken)
+            if (itemFind!.myCollection!.user!.accessToken != accessToken && itemFind!.myCollection!.user!.role == 0)
                 return new JsonResult("No access to item.");
             CollectionFields[] collectionFieldsArr = _context.collectionFields.Where(field => field.myCollection!.id == itemFind.id).ToArray();
             ItemFields[] itemFieldsArr = item.fields.ToArray();
@@ -102,7 +102,7 @@ namespace finalTaskItra.Controllers
         }
         
         [HttpDelete("delete/")]
-        [Authorize(Roles = "0")]
+        [Authorize(Roles = "0, 1")]
         public JsonResult DeleteMyItem(int itemId, string accessToken)
         {
             User? user = _context.users
@@ -115,7 +115,7 @@ namespace finalTaskItra.Controllers
                 .FirstOrDefault(itemFind => itemFind.id == itemId);
             if (itemFind is null)
                 return new JsonResult("No item found");
-            if (itemFind!.myCollection!.user!.accessToken != accessToken)
+            if (itemFind!.myCollection!.user!.accessToken != accessToken && itemFind!.myCollection!.user!.role == 0)
                 return new JsonResult("No access to item.");
             _context.items.Remove(itemFind);
             _context.SaveChanges();

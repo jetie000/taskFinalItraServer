@@ -22,7 +22,7 @@ namespace finalTaskItra.Controllers
         }
 
         [HttpPost("add/")]
-        [Authorize(Roles = "0")]
+        [Authorize(Roles = "0, 1")]
         public JsonResult PostMyComment(Comment comment, int itemId, string accessToken)
         {
             User? user = _context.users
@@ -40,7 +40,7 @@ namespace finalTaskItra.Controllers
         }
 
         [HttpDelete("delete/")]
-        [Authorize(Roles = "0")]
+        [Authorize(Roles = "0, 1")]
         public JsonResult DeleteMyComment(int commentId, string accessToken)
         {
             User? user = _context.users
@@ -54,7 +54,7 @@ namespace finalTaskItra.Controllers
                 .FirstOrDefault(commentFind => commentFind.id == commentId);
             if (commentFind is null)
                 return new JsonResult("No comment found");
-            if (commentFind.item!.myCollection!.user!.accessToken != accessToken)
+            if (commentFind.item!.myCollection!.user!.accessToken != accessToken && commentFind.item.myCollection!.user!.role == 0)
                 return new JsonResult("No access to comment.");
             _context.comments.Remove(commentFind);
             _context.SaveChanges();

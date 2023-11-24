@@ -57,13 +57,13 @@ namespace finalTaskItra.Controllers
         {
             User? userFind = _context.users.FirstOrDefault(userFind =>
                 userFind.email == user.email);
+            if (userFind != null)
+                return new JsonResult("User exists.");
             string saltedPassword = user.saltedPassword + _configuration["Salt"];
             for (int i = 0; i < Convert.ToInt32(_configuration["Iterations"]); i++)
             {
                 saltedPassword = HashWithSHA256(saltedPassword);
             }
-            if (userFind != null)
-                return new JsonResult("User exists.");
             User newUser = new User();
             newUser.email = user.email;
             newUser.saltedPassword = saltedPassword;
@@ -91,8 +91,62 @@ namespace finalTaskItra.Controllers
             return new JsonResult("User created");
         }
 
+        [HttpGet("getAll")]
+        [Authorize(Roles = "1")]
+        public JsonResult getAll(UserChangeInfo user)
+        {
+            return new JsonResult(_context.users.ToArray());
+        }
+
+        [HttpPut("changeInfoAdmin/")]
+        [Authorize(Roles = "1")]
+        public JsonResult ChangeInfoAdmin(UserChangeInfo user)
+        {
+            User? userFind = _context.users.FirstOrDefault(userFind =>
+                userFind.email == user.email && userFind.accessToken != user.accessToken);
+            if (userFind != null)
+                return new JsonResult("User with that email exists.");
+            string saltedPasswordOld = user.saltedOldPassword + _configuration["Salt"];
+            for (int i = 0; i < Convert.ToInt32(_configuration["Iterations"]); i++)
+            {
+                saltedPasswordOld = HashWithSHA256(saltedPasswordOld);
+            }
+            var userToChange = _context.users.FirstOrDefault(userToFind => userToFind.accessToken == user.accessToken && userToFind.saltedPassword == saltedPasswordOld);
+            if (userToChange == null)
+                return new JsonResult("Wrong Password.");
+            userToChange.email = user.email;
+            userToChange.access = user.access;
+            userToChange.role = user.role;
+            if (user.saltedNewPassword != "")
+            {
+                string saltedPasswordNew = user.saltedNewPassword + _configuration["Salt"];
+                for (int i = 0; i < Convert.ToInt32(_configuration["Iterations"]); i++)
+                {
+                    saltedPasswordNew = HashWithSHA256(saltedPasswordNew);
+                }
+                userToChange.saltedPassword = saltedPasswordNew;
+            }
+            userToChange.fullName = user.fullName;
+            var claims = new List<Claim>
+                    {
+                        new Claim(ClaimTypes.Name, userToChange.fullName),
+                        new Claim(ClaimTypes.Role, Convert.ToString(userToChange.role)),
+                        new Claim(ClaimTypes.Email, userToChange.email),
+                    };
+            // создаем JWT-токен
+            var jwt = new JwtSecurityToken(
+                    claims: claims,
+                    signingCredentials: new SigningCredentials(new AuthOptions(_configuration).GetSymmetricSecurityKey(), SecurityAlgorithms.HmacSha256)
+                    );
+
+            var encodedJwt = new JwtSecurityTokenHandler().WriteToken(jwt);
+            userToChange.accessToken = encodedJwt;
+            _context.SaveChanges();
+            return new JsonResult("User changed.");
+        }
+
         [HttpPut("changeInfo/")]
-        [Authorize(Roles = "0")]
+        [Authorize(Roles = "0, 1")]
         public JsonResult ChangeInfo(UserChangeInfo user)
         {
             User? userFind = _context.users.FirstOrDefault(userFind =>
@@ -137,7 +191,7 @@ namespace finalTaskItra.Controllers
         }
 
         [HttpDelete("delete/")]
-        [Authorize(Roles = "0")]
+        [Authorize(Roles = "0, 1")]
         public JsonResult Delete(UserDeleteInfo info)
         {
             User? user = _context.users.FirstOrDefault(user =>
