@@ -87,7 +87,7 @@ namespace finalTaskItra.Controllers
                 .FirstOrDefault(itemFind => itemFind.id == item.id);
             if (itemFind is null)
                 return new JsonResult("No item found.");
-            if (itemFind!.myCollection!.user!.accessToken != accessToken && itemFind!.myCollection!.user!.role == 0)
+            if (itemFind!.myCollection!.user!.accessToken != accessToken && user.role == 0)
                 return new JsonResult("No access to item.");
             CollectionFields[] collectionFieldsArr = _context.collectionFields.Where(field => field.myCollection!.id == itemFind.id).ToArray();
             ItemFields[] itemFieldsArr = item.fields.ToArray();
@@ -115,7 +115,7 @@ namespace finalTaskItra.Controllers
                 .FirstOrDefault(itemFind => itemFind.id == itemId);
             if (itemFind is null)
                 return new JsonResult("No item found");
-            if (itemFind!.myCollection!.user!.accessToken != accessToken && itemFind!.myCollection!.user!.role == 0)
+            if (itemFind!.myCollection!.user!.accessToken != accessToken && user.role == 0)
                 return new JsonResult("No access to item.");
             _context.items.Remove(itemFind);
             _context.SaveChanges();

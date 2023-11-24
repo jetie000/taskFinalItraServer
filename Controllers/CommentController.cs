@@ -54,11 +54,27 @@ namespace finalTaskItra.Controllers
                 .FirstOrDefault(commentFind => commentFind.id == commentId);
             if (commentFind is null)
                 return new JsonResult("No comment found");
-            if (commentFind.item!.myCollection!.user!.accessToken != accessToken && commentFind.item.myCollection!.user!.role == 0)
+            if (commentFind.item!.myCollection!.user!.accessToken != accessToken && user.role == 0)
                 return new JsonResult("No access to comment.");
             _context.comments.Remove(commentFind);
             _context.SaveChanges();
             return new JsonResult("Comment deleted.");
+        }
+
+        [HttpGet("getMy/")]
+        [Authorize(Roles = "0, 1")]
+        public JsonResult getComments(string accessToken)
+        {
+            User? user = _context.users
+                .FirstOrDefault(user => user.accessToken == accessToken);
+            if (user is null)
+                return new JsonResult("No user found.");
+            Item?[] items = _context.items
+                .Include(item => item.likes)
+                .Include(item => item.comments)
+                .Include(item => item.tags)
+                .Include(item => item.myCollection).Where(item => item.comments.Any(comment => comment.userId == user.id)).ToArray();
+            return new JsonResult(items);
         }
     }
 }

@@ -2,6 +2,7 @@
 using finalTaskItra.Models;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 
 namespace finalTaskItra.Controllers
 {
@@ -63,6 +64,22 @@ namespace finalTaskItra.Controllers
             }
             _context.SaveChanges();
             return new JsonResult("Reaction set.");
+        }
+
+        [HttpGet("getMy/")]
+        [Authorize(Roles = "0, 1")]
+        public JsonResult getReactions(string accessToken)
+        {
+            User? user = _context.users
+                .FirstOrDefault(user => user.accessToken == accessToken);
+            if (user is null)
+                return new JsonResult("No user found.");
+            Item?[] items = _context.items
+                .Include(item => item.likes)
+                .Include(item => item.comments)
+                .Include(item => item.tags)
+                .Include(item => item.myCollection).Where(item => item.likes.Any(like => like.userId == user.id)).ToArray();
+            return new JsonResult(items);
         }
 
     }
