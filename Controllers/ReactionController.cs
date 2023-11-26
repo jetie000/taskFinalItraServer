@@ -34,8 +34,12 @@ namespace finalTaskItra.Controllers
                 return new JsonResult("No item found.");
             Reaction reactionToSet = reaction;
             reactionToSet.creationDate = DateTime.Now;
-            Reaction? reactionToFindLike = _context.likes.FirstOrDefault(reactionToFind => reactionToFind.isLike == true && reactionToFind.userId == reaction.userId);
-            Reaction? reactionToFindDislike = _context.likes.FirstOrDefault(reactionToFind => reactionToFind.isLike == false && reactionToFind.userId == reaction.userId);
+            Reaction? reactionToFindLike = _context.likes
+                .Include(like => like.item)
+                .FirstOrDefault(reactionToFind => reactionToFind.isLike == true && reactionToFind.userId == reaction.userId && reactionToFind.item!.id == itemId);
+            Reaction? reactionToFindDislike = _context.likes
+                .Include(like => like.item)
+                .FirstOrDefault(reactionToFind => reactionToFind.isLike == false && reactionToFind.userId == reaction.userId && reactionToFind.item!.id == itemId);
             if (reactionToFindLike is null && reactionToFindDislike is null)
                 item.likes.Add(reactionToSet);
             else

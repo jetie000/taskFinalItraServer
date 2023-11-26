@@ -13,7 +13,7 @@ builder.Services.AddCors(c =>
 {
     c.AddPolicy("AllowOrigin", options =>
     {
-        options.WithOrigins("https://final-task-itra.vercel.app").AllowAnyMethod().AllowAnyHeader().AllowCredentials();
+        options.WithOrigins("https://final-task-itra-client.vercel.app").AllowAnyMethod().AllowAnyHeader().AllowCredentials();
         options.WithOrigins("http://localhost:3000").AllowAnyMethod().AllowAnyHeader().AllowCredentials();
     });
 });

@@ -24,6 +24,38 @@ namespace finalTaskItra.Controllers
             _context = context;
         }
 
+        [HttpGet("getLast/")]
+        public JsonResult GetLast(int limit)
+        {
+            if(limit < 0)
+                return new JsonResult("Wrong limit.");
+            Item?[] responseItem = _context.items
+                .Include(itemFind => itemFind.likes)
+                .Include(itemFind => itemFind.tags)
+                .Include(itemFind => itemFind.fields)
+                .Include(itemFind => itemFind.comments)
+                .Include(itemFind => itemFind.myCollection)
+                    .ThenInclude(myCollection => myCollection!.user)
+                .OrderByDescending(item => item.id).Take(limit).ToArray();
+            if (responseItem is null || responseItem.Length == 0)
+                return new JsonResult("No item found.");
+            var itemInfo = new List<ItemInfo>();
+            for (int i = 0; i < responseItem.Length; i++)
+            {
+                int id = responseItem[i]!.myCollection!.user!.id;
+                responseItem[i]!.myCollection!.user!.accessToken = null!;
+                responseItem[i]!.myCollection!.user!.saltedPassword = null!;
+                responseItem[i]!.myCollection!.user!.email = null!;
+                itemInfo.Add(new ItemInfo
+                {
+                    userId = id,
+                    collectionId = responseItem[i]!.myCollection!.id,
+                    item = responseItem[i]!
+                });
+            }
+            return new JsonResult(itemInfo);
+        }
+
         [HttpGet("getOne/")]
         public JsonResult GetOneItem(int itemId)
         {
@@ -95,12 +127,13 @@ namespace finalTaskItra.Controllers
             if (response != "Ok")
                 return new JsonResult(response);
             itemFind.name = item.name;
+            _context.tags.RemoveRange(itemFind.tags);
             itemFind.tags = item.tags;
             itemFind.fields = item.fields;
             _context.SaveChanges();
             return new JsonResult("Item changed.");
         }
-        
+
         [HttpDelete("delete/")]
         [Authorize(Roles = "0, 1")]
         public JsonResult DeleteMyItem(int itemId, string accessToken)

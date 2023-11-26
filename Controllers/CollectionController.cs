@@ -21,6 +21,19 @@ namespace finalTaskItra.Controllers
             _context = context;
         }
 
+        [HttpGet("getLargest/")]
+        public JsonResult GetLargestCollections(int limit)
+        {
+            if (limit < 0)
+                return new JsonResult("Wrong limit.");
+            var collections = _context.collections
+                .Include(c => c.items)
+                .Include(user => user.collectionFields)
+                .OrderByDescending(c => c.items.ToArray().Length)
+                .Take(limit);
+            return new JsonResult(collections);
+        }
+
         [HttpGet("getMy/")]
         [Authorize(Roles = "0, 1")]
         public JsonResult GetMyCollections(string accessToken)

@@ -2,7 +2,7 @@
 {
     public class UserConnection
     {
-        public string UserName { get; set; } = null!;
+        public string UserId { get; set; } = null!;
         public string RoomIdCon { get; set; } = null!;
     }
 }
