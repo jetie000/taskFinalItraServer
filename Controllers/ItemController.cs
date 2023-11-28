@@ -1,5 +1,6 @@
 ﻿using finalTaskItra.Data;
 using finalTaskItra.Models;
+using LinqKit;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
@@ -22,6 +23,41 @@ namespace finalTaskItra.Controllers
             _configuration = configuration;
             _env = env;
             _context = context;
+        }
+
+        [HttpGet("search/")]
+        public JsonResult Search(string contain, int limit)
+        {
+            Item[] items;
+            if (!string.IsNullOrWhiteSpace(contain))
+            {
+                var terms = contain.Split(' ').ToList();
+                var predicate = PredicateBuilder.New<Item>(false);
+                foreach (var term in terms)
+                    predicate = predicate
+                        .Or(x => x.name.Contains(term))
+                        .Or(x => x.tags.Any(tag => tag.tag.Contains(term)))
+                        .Or(x => x.myCollection.title.Contains(term))
+                        .Or(x => x.myCollection.theme.Contains(term))
+                        .Or(x => x.myCollection.description.Contains(term));
+                items = _context.items
+                    .Include(item => item.likes)
+                    .Include(item => item.tags)
+                    .Include(item => item.comments)
+                    .Include(item => item.myCollection)
+                    .Where(predicate)
+                    .Take(limit)
+                    .ToArray();
+            }
+            else
+                items = _context.items
+                    .Include(item => item.likes)
+                    .Include(item => item.tags)
+                    .Include(item => item.comments)
+                    .Include(item => item.myCollection)
+                    .Take(limit)
+                    .ToArray();
+            return new JsonResult(items);
         }
 
         [HttpGet("getLast/")]
