@@ -28,6 +28,7 @@
   <ItemGroup>
     <Folder Include="photos\" />
     <Folder Include="photos\26\" />
+    <Folder Include="photos\27\" />
     <Folder Include="wwwroot\" />
   </ItemGroup>
 
